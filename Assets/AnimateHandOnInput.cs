@@ -1,26 +1,56 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class AnimateHandOnInput : MonoBehaviour
+[RequireComponent(typeof(Animator))]
+public class AnimateHandOninput : MonoBehaviour
 {
-    public InputActionProperty triggerValue;
-    public InputActionProperty gripValue;
+    [SerializeField] private InputActionProperty triggerValue;
+    [SerializeField] private InputActionProperty gripValue;
 
-    public Animator handAnimator;
+    [SerializeField] private Animator handAnimator;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private static readonly int TriggerHash = Animator.StringToHash("Trigger");
+    private static readonly int GripHash = Animator.StringToHash("Grip");
+
+    private void Awake()
     {
-        
+        if (handAnimator == null)
+            handAnimator = GetComponent<Animator>();
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnEnable()
     {
-        float trigger = triggerValue.action.ReadValue<float>();
-        float grip = gripValue.action.ReadValue<float>();
+        if (triggerValue != null && triggerValue.action != null)
+            triggerValue.action.Enable();
 
-        handAnimator.SetFloat("Trigger", trigger);
-        handAnimator.SetFloat("Grip", grip);
+        if (gripValue != null && gripValue.action != null)
+            gripValue.action.Enable();
+    }
+
+    private void OnDisable()
+    {
+        if (triggerValue != null && triggerValue.action != null)
+            triggerValue.action.Disable();
+
+        if (gripValue != null && gripValue.action != null)
+            gripValue.action.Disable();
+    }
+
+    private void Update()
+    {
+        if (handAnimator == null)
+            return;
+
+        float trigger = 0f;
+        float grip = 0f;
+
+        if (triggerValue != null && triggerValue.action != null)
+            trigger = triggerValue.action.ReadValue<float>();
+
+        if (gripValue != null && gripValue.action != null)
+            grip = gripValue.action.ReadValue<float>();
+
+        handAnimator.SetFloat(TriggerHash, trigger);
+        handAnimator.SetFloat(GripHash, grip);
     }
 }
